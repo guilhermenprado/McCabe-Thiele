@@ -2,6 +2,20 @@ import { useState } from 'react'
 import './App.css'
 
 
+function calcularCurvaELV() {
+const xL =[]; // Array para armazenar os valores de xL - fração molar do componente mais volátil na fase líquida
+const yV = []; // Array para armazenar os valores de yV - fração molar do componente mais volátil na fase vapor
+  const alpha = Math.random() * 10 + 1; // Gerar um valor aleatório para alpha entre 1 e 10
+
+  for (let x = 0; x <= 1; x += 0.01) {
+    const y = (alpha * x) / (1 + (alpha - 1) * x); // Cálculo da fração molar do componente mais volátil na fase vapor usando a relação de equilíbrio
+    xL.push(x); // Armazenar o valor de xL no array
+    yV.push(y); // Armazenar o valor de yV no array
+
+    console.log(`xL: ${x.toFixed(2)}, yV: ${y.toFixed(2)}`); // Exibir os valores de xL e yV no console para verificação
+  }
+} 
+
 function App() {
   return (
 
@@ -35,7 +49,7 @@ function App() {
 
 <div className="curva_elv">
         <h1>Curva de Equilíbrio Líquido-Vapor (ELV)</h1>
-        <button type='submit'>Calcular Curva ELV</button>
+        <button onClick={calcularCurvaELV}>Calcular Curva ELV</button>
       </div>
 
       <div className="tabela_variaveis">
