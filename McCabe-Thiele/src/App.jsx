@@ -2,21 +2,30 @@ import { useState } from 'react'
 import './App.css'
 import {  LineChart,  Line,  XAxis,  YAxis,  CartesianGrid,  Tooltip} from "recharts";
 
-function calcularCurvaELV() {
+
+function App() {
+
 const [xL, setxL] = useState([]); // Array para armazenar os valores de xL - fração molar do componente mais volátil na fase líquida
 const [yV, setyV] = useState([]); // Array para armazenar os valores de yV - fração molar do componente mais volátil na fase vapor
   const alpha = Math.random() * 10 + 1; // Gerar um valor aleatório para alpha entre 1 e 10
 
-  for (let x = 0; x <= 1; x += 0.01) {
-    const y = (alpha * x) / (1 + (alpha - 1) * x); // Cálculo da fração molar do componente mais volátil na fase vapor usando a relação de equilíbrio
-    setxL(prev => [...prev, x]); // Armazenar o valor de xL no array
-    setyV(prev => [...prev, y]); // Armazenar o valor de yV no array
+function calcularCurvaELV() {
+  const novoXL = [];
+  const novoYV = [];
 
-    console.log(`xL: ${x.toFixed(2)}, yV: ${y.toFixed(2)}`); // Exibir os valores de xL e yV no console para verificação
+  for (let x = 0; x <= 1; x += 0.01) {
+    const y =  (alpha * x) /  (1 + (alpha - 1) * x);
+
+    novoXL.push(x);
+    novoYV.push(y);
+
+    console.log(      `xL: ${x.toFixed(2)}, yV: ${y.toFixed(2)}`    );
   }
+
+  setxL(novoXL);
+  setyV(novoYV);
 } 
 
-function App() {
   return (
 
     <div className="App">
@@ -47,7 +56,7 @@ function App() {
       
             </div>
 
-<div className="curva_elv">
+<div className="curva_elv"> {/* Seção para a curva de equilíbrio líquido-vapor */}
         <h1>Curva de Equilíbrio Líquido-Vapor (ELV)</h1>
         <button onClick={calcularCurvaELV}>Calcular Curva ELV</button>
       </div>
@@ -55,7 +64,7 @@ function App() {
       <div className="tabela_variaveis">
         <h1>Insira os valores das variáveis</h1>
 
-<form>
+<form> {/* Formulário para entrada dos valores das variáveis*/}
 
 <input placeholder='Valor de xF' type="number" name="xF" id="xF"/>
 <input placeholder='Valor de xD' type="number" name="xD" id="xD"/>
@@ -69,17 +78,19 @@ function App() {
 <div className="resultado">
         <h1>Resultado</h1>
         <p>Número de pratos teóricos necessários: </p>
+</div>
 
-        <linechart width={500} height={300} data={xL.map((x, index) => ({ xL: x, yV: yV[index] }))}>
-          <XAxis dataKey="xL" />
-          <YAxis />
-          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-          <Tooltip />
-          <Line type="monotone" dataKey="yV" stroke="#8884d8" />
-        </linechart>
-      </div>
+<div className="grafico"> {/* Seção para o gráfico da curva de equilíbrio líquido-vapor */}
+<LineChart width={600} height={300} data={xL.map((x, index) => ({ xL: x, yV: yV[index] }))}>
+  <CartesianGrid strokeDasharray="3 3" />
+  <XAxis dataKey="xL" label={{ value: 'Fração Molar na Fase Líquida (xL)', position: 'insideBottom', offset: -5 }} />
+  <YAxis label={{ value: 'Fração Molar na Fase Vapor (yV)', angle: -90, position: 'insideLeft' }} />
+  <Tooltip />
+  <Line type="monotone" dataKey="yV" stroke="#8884d8" dot={false} />
+</LineChart>
+</div>
 
-    </div>
+  </div>
   )
 }
 
