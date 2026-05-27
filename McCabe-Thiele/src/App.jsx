@@ -166,7 +166,40 @@ if(marcador==1){
   const novoXP = [];
   const novoYP = [];
 
+for(p=0;xB>novoXP[p] && xB >novoXY[p]; p++){
 
+if(p==0){ {/*Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)*/}
+  novoXP.push(xD);
+  novoYP.push(xD);
+  marcadorpratos=1;
+
+}
+
+if(marcadorpratos==1){ {/*Atribui os pontos quando o gráfico anda na horizontal*/}
+  NovoYP.push(novoYR[p-1]);
+NovoXP.push(    novoYP[p] /    (alpha - novoYP[p] * (alpha - 1)));
+marcadorpratos=2;
+}
+
+if(marcadorpratos==2){ {/*Atribui os pontos quando o gráfico anda na vertical*/}
+
+  if(novoXP[p-1] > xEncontro){ {/*Calcula x quando está na linha de retificação*/}
+novoXP.push(novoXP[p-1]);
+novoYP.push(R /  (R + 1) * novoxP[p] +  xD /  (R + 1));
+marcadorpratos=1;
+  }
+
+  if(novoXP[p-1] < xEncontro){ {/*Calcula x quando está na linha de esgotamento*/}
+novoXP.push(novoXP[p-1]);
+novoYP.push(m * (novoXP[p] - xB) + xB);
+marcadorpratos=1;
+  }
+
+}
+
+numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
+console.log(p-1, marcadorPratos, numeroPratos, novoXP[p-1], novoYP[p-1], xEncontro);
+}
 
   }
 }
