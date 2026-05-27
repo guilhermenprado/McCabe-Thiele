@@ -23,7 +23,14 @@ const [q, setq] = useState(0); // Razão de alimentação
 
 const [yR, setyR] = useState([]); // Array para armazenar os valores de yR - fração molar do componente mais volátil na fase vapor em cada prato para a curva de retificação  
 const [yA, setyA] = useState([]); // Array para armazenar os valores de yA - fração molar do componente mais volátil na fase vapor em cada prato para a curva de alimentação
+const [xA, setxA] = useState([]); // Array para armazenar os valores de xA - fração molar do componente mais volátil na fase líquida em cada prato para a curva de alimentação
 const [yE, setyE] = useState([]); // Array para armazenar os valores de yE - fração molar do componente mais volátil na fase vapor em cada prato para a curva de esgotamento
+let xEncontro = 0; // Variável para armazenar o valor de x no ponto de encontro entre as curvas de retificação e alimentação
+
+const [xP, setxP] = useState([]); // Array para armazenar os valores de xP - fração molar do componente mais volátil na fase líquida em cada prato
+const [yP, setyP] = useState([]); // Array para armazenar os valores de yP - fração molar do componente mais volátil na fase vapor em cada prato
+let numeroPratos = 0; // Variável para armazenar o número de pratos teóricos necessários para a separação
+let marcadorpratos=0; // Variável para controlar o índice do array dos pratos teóricos
 
 function calcularCurvaELV() {
   const novoXL = [];
@@ -79,21 +86,25 @@ p=p+1;
 
   //calcular a curva de alimentação
   const novoYA = [];
+  const novoXA = [];
   p=0;
   
   for (let x = 0; x <= 1; x += 0.01) {
 
     const y =  q /  (q - 1) * x +  xF /  (1 - q);
 
-    if (x <= xF+0.01) { {/*x <= xF + 0.01 && y < novoYR[p]*/}
+    if (x <= xF+0.01) { 
       novoYA.push(y);
+      novoXA.push(x);
     } else {
       novoYA.push(null);
+      novoXA.push(null);
     }
     p = p + 1;
   }
 
   setyA(novoYA);
+  setxA(novoXA);
 
   //calcular a curva de esgotamento
 
@@ -140,6 +151,7 @@ if(novoYR[p] < novoYA[p]){
     // limpar a curva de alimentação
 if(novoYR[p] < novoYA[p]){
       novoYA[p-1] = null;
+     xEncontro = novoXA[p]; // Armazenar o valor de x no ponto de encontro entre as curvas de retificação e alimentação
   }
   else {
     marcador=1;
@@ -150,10 +162,15 @@ if(marcador==1){
       novoYE[p+1] = null;
 }
 
-console.log(novoYE[p], novoYR[p], p, marcador);
+// Desenhar no grafico os pratos teóricos
+  const novoXP = [];
+  const novoYP = [];
+
+
 
   }
 }
+
   return (
 
     <div className="App">
