@@ -30,7 +30,7 @@ let xEncontro = 0; // Variável para armazenar o valor de x no ponto de encontro
 const [xP, setxP] = useState([]); // Array para armazenar os valores de xP - fração molar do componente mais volátil na fase líquida em cada prato
 const [yP, setyP] = useState([]); // Array para armazenar os valores de yP - fração molar do componente mais volátil na fase vapor em cada prato
 let numeroPratos = 0; // Variável para armazenar o número de pratos teóricos necessários para a separação
-let marcadorpratos=0; // Variável para controlar o índice do array dos pratos teóricos
+let marcadorPratos=0; // Variável para controlar o índice do array dos pratos teóricos
 
 function calcularCurvaELV() {
   const novoXL = [];
@@ -79,9 +79,11 @@ p=0;
     novoXR.push(x);
       novoYR.push(null);
   }
+
   }
 p=p+1;
   setyR(novoYR);
+
 
 
   //calcular a curva de alimentação
@@ -165,40 +167,51 @@ if(marcador==1){
 // Desenhar no grafico os pratos teóricos
   const novoXP = [];
   const novoYP = [];
+p=0;
+for(let x=0; x<=1; x+=0.01){
 
-for(p=0;xB>novoXP[p] && xB >novoXY[p]; p++){
 
-if(p==0){ {/*Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)*/}
-  novoXP.push(xD);
-  novoYP.push(xD);
-  marcadorpratos=1;
-
-}
-
-if(marcadorpratos==1){ {/*Atribui os pontos quando o gráfico anda na horizontal*/}
-  NovoYP.push(novoYR[p-1]);
-NovoXP.push(    novoYP[p] /    (alpha - novoYP[p] * (alpha - 1)));
-marcadorpratos=2;
-}
-
-if(marcadorpratos==2){ {/*Atribui os pontos quando o gráfico anda na vertical*/}
+if(marcadorPratos==2){ {/*Atribui os pontos quando o gráfico anda na vertical*/}
 
   if(novoXP[p-1] > xEncontro){ {/*Calcula x quando está na linha de retificação*/}
 novoXP.push(novoXP[p-1]);
 novoYP.push(R /  (R + 1) * novoxP[p] +  xD /  (R + 1));
-marcadorpratos=1;
+marcadorPratos=1;
   }
 
   if(novoXP[p-1] < xEncontro){ {/*Calcula x quando está na linha de esgotamento*/}
 novoXP.push(novoXP[p-1]);
 novoYP.push(m * (novoXP[p] - xB) + xB);
-marcadorpratos=1;
+marcadorPratos=1;
   }
 
 }
 
+if(marcadorPratos==1){ {/*Atribui os pontos quando o gráfico anda na horizontal*/}
+  novoYP.push(novoYP[p-1]);
+
+  const x=novoYP[p] * (alpha - 1) / alpha;
+  
+  novoXP.push(x);
+  marcadorPratos=2;
+}
+
+if(Math.abs(novoXR[98-p]-xD)<=0.001){ {/*Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)*/}
+  novoXP.push(xD);
+  novoYP.push(xD);
+  marcadorPratos=1;
+
+}
+
+else{
+  novoXP.push(null);
+  novoYP.push(null);
+
+}
+
 numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
-console.log(p-1, marcadorPratos, numeroPratos, novoXP[p-1], novoYP[p-1], xEncontro);
+console.log(p, marcadorPratos, numeroPratos, novoXP[p], novoYP[p], xEncontro, xD, novoXR[98-p],Math.abs(novoXR[98-p]-xD));
+p=p+1;
 }
 
   }
