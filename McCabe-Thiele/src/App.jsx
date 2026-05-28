@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import {  LineChart,  Line,  XAxis,  YAxis,  CartesianGrid,  Tooltip} from "recharts";
 
-const alphai = Math.random() * 10 + 1; // Gerar um valor aleatório para alpha entre 1 e 10
+const alpha = Math.random() * 10 + 2; // Gerar um valor aleatório para alpha entre 2 e 11
 function App() {
 
 
@@ -10,7 +10,7 @@ const [yD, setyD] = useState([]); // Array para armazenar os valores da reta dia
   
 const [xL, setxL] = useState([]); // Array para armazenar os valores de xL - fração molar do componente mais volátil na fase líquida
 const [yV, setyV] = useState([]); // Array para armazenar os valores de yV - fração molar do componente mais volátil na fase vapor
-const alpha = parseFloat(alphai.toFixed(2)); // Arredondar o valor de alpha para 2 casas decimais
+
 let m=0; // Variável para armazenar o valor de m - coeficiente angular da reta de esgotamento
 let p=0; // Variável para controlar o índice do array
 
@@ -31,6 +31,7 @@ const [xP, setxP] = useState([]); // Array para armazenar os valores de xP - fra
 const [yP, setyP] = useState([]); // Array para armazenar os valores de yP - fração molar do componente mais volátil na fase vapor em cada prato
 let numeroPratos = 0; // Variável para armazenar o número de pratos teóricos necessários para a separação
 let marcadorPratos=0; // Variável para controlar o índice do array dos pratos teóricos
+let confirmar=0;
 
 function calcularCurvaELV() {
   const novoXL = [];
@@ -163,6 +164,7 @@ if(novoYR[p] < novoYA[p]){
 if(marcador==1){
       novoYE[p+1] = null;
 }
+  }
 
 // Desenhar no grafico os pratos teóricos
   const novoXP = [];
@@ -170,25 +172,34 @@ if(marcador==1){
 p=0;
 for(let x=0; x<=1; x+=0.01){
 
+  
+if(marcadorPratos==2){ //Atribui os pontos quando o gráfico anda na vertical
 
-if(marcadorPratos==2){ {/*Atribui os pontos quando o gráfico anda na vertical*/}
 
-  if(novoXP[p-1] > xEncontro){ {/*Calcula x quando está na linha de retificação*/}
+  if(novoXP[p-1] > xEncontro){ //Calcula x quando está na linha de retificação
 novoXP.push(novoXP[p-1]);
-novoYP.push(R /  (R + 1) * novoXP[p] +  xD /  (R + 1));
+const y= R /  (R + 1) * novoXP[p] +  xD /  (R + 1);
+novoYP.push(y);
 marcadorPratos=1;
   }
 
-  if(novoXP[p-1] < xEncontro){ {/*Calcula x quando está na linha de esgotamento*/}
-novoXP.push(novoXP[p-1]);
-novoYP.push(m * (novoXP[p] - xB) + xB);
+  if(novoXP[p-1] < xEncontro){ //Calcula x quando está na linha de esgotamento
+
+confirmar=1;
+  novoXP.push(novoXP[p-1]);
+
+  const y=m * (novoXP[p] - xB) + xB;
+
+novoYP.push(y);
 marcadorPratos=1;
   }
 
 }
 
-if(marcadorPratos==1){ {/*Atribui os pontos quando o gráfico anda na horizontal*/}
+else if(marcadorPratos==1){ //Atribui os pontos quando o gráfico anda na horizontal
   novoYP.push(novoYP[p-1]);
+
+  confirmar=2;
 
   const x=novoYP[p] /(alpha-novoYP[p]*(alpha-1));// Calcula x quando está na linha de equilíbrio líquido-vapor
   
@@ -196,25 +207,25 @@ if(marcadorPratos==1){ {/*Atribui os pontos quando o gráfico anda na horizontal
   marcadorPratos=2;
 }
 
-if(Math.abs(novoXR[98-p]-xD)<=0.001){ {/*Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)*/}
+else if(Math.abs(novoXR[98-p]-xD)<=0.001){ //Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)
   novoXP.push(xD);
   novoYP.push(xD);
   marcadorPratos=1;
 
 }
 
-else{
+else if(marcadorPratos==0){ // Atribui null para os pontos dos pratos teóricos antes do primeiro ponto (xD, xD)
   novoXP.push(null);
   novoYP.push(null);
 
 }
 
 numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
-console.log(p, marcadorPratos, numeroPratos, novoXP[p], novoYP[p], xEncontro, alpha, novoYP[p] * (alpha - 1) / alpha);
+console.log(p, marcadorPratos, numeroPratos, novoXP[p], novoYP[p], xEncontro, alpha, confirmar);
 p=p+1;
 }
 
-  }
+  
 }
 
   return (
