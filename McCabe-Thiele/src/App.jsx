@@ -166,7 +166,7 @@ if(marcador==1){
 }
   }
 
-// Desenhar no grafico os pratos teóricos
+// Definir os pontos para os pratos teóricos
   const novoXP = [];
   const novoYP = [];
 p=0;
@@ -185,13 +185,22 @@ marcadorPratos=1;
 
   if(novoXP[p-1] < xEncontro){ //Calcula x quando está na linha de esgotamento
 
-confirmar=1;
+if(novoXP[p-1] < xB ){ 
+ novoXP.push(novoXP[p-1]);
+ novoYP.push(novoXP[p-1]);
+  marcadorPratos=0;
+
+}
+
+else{
   novoXP.push(novoXP[p-1]);
 
   const y=m * (novoXP[p] - xB) + xB;
 
 novoYP.push(y);
 marcadorPratos=1;
+}
+
   }
 
 }
@@ -199,7 +208,6 @@ marcadorPratos=1;
 else if(marcadorPratos==1){ //Atribui os pontos quando o gráfico anda na horizontal
   novoYP.push(novoYP[p-1]);
 
-  confirmar=2;
 
   const x=novoYP[p] /(alpha-novoYP[p]*(alpha-1));// Calcula x quando está na linha de equilíbrio líquido-vapor
   
@@ -214,9 +222,16 @@ else if(Math.abs(novoXR[98-p]-xD)<=0.001){ //Atribui o primeiro ponto dos pratos
 
 }
 
-else if(marcadorPratos==0){ // Atribui null para os pontos dos pratos teóricos antes do primeiro ponto (xD, xD)
+if(marcadorPratos==0 ){ // Atribui null para os pontos dos pratos teóricos antes do primeiro ponto (xD, xD)
   novoXP.push(null);
   novoYP.push(null);
+
+}
+
+if(novoXP[p-1] < xB && marcadorPratos==2){ // Atribui null para os pontos dos pratos teóricos antes do primeiro ponto (xD, xD)
+  novoXP.push(null);
+  novoYP.push(null);
+  marcadorPratos=0;
 
 }
 
