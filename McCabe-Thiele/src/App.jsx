@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import {  LineChart,  Line,  XAxis,  YAxis,  CartesianGrid,  Tooltip} from "recharts";
 
-
+const alphai = Math.random() * 10 + 1; // Gerar um valor aleatório para alpha entre 1 e 10
 function App() {
 
 
@@ -10,7 +10,7 @@ const [yD, setyD] = useState([]); // Array para armazenar os valores da reta dia
   
 const [xL, setxL] = useState([]); // Array para armazenar os valores de xL - fração molar do componente mais volátil na fase líquida
 const [yV, setyV] = useState([]); // Array para armazenar os valores de yV - fração molar do componente mais volátil na fase vapor
-const alpha = Math.random() * 10 + 1; // Gerar um valor aleatório para alpha entre 1 e 10
+const alpha = parseFloat(alphai.toFixed(2)); // Arredondar o valor de alpha para 2 casas decimais
 let m=0; // Variável para armazenar o valor de m - coeficiente angular da reta de esgotamento
 let p=0; // Variável para controlar o índice do array
 
@@ -175,7 +175,7 @@ if(marcadorPratos==2){ {/*Atribui os pontos quando o gráfico anda na vertical*/
 
   if(novoXP[p-1] > xEncontro){ {/*Calcula x quando está na linha de retificação*/}
 novoXP.push(novoXP[p-1]);
-novoYP.push(R /  (R + 1) * novoxP[p] +  xD /  (R + 1));
+novoYP.push(R /  (R + 1) * novoXP[p] +  xD /  (R + 1));
 marcadorPratos=1;
   }
 
@@ -190,7 +190,7 @@ marcadorPratos=1;
 if(marcadorPratos==1){ {/*Atribui os pontos quando o gráfico anda na horizontal*/}
   novoYP.push(novoYP[p-1]);
 
-  const x=novoYP[p] * (alpha - 1) / alpha;
+  const x=novoYP[p] /(alpha-novoYP[p]*(alpha-1));// Calcula x quando está na linha de equilíbrio líquido-vapor
   
   novoXP.push(x);
   marcadorPratos=2;
@@ -210,7 +210,7 @@ else{
 }
 
 numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
-console.log(p, marcadorPratos, numeroPratos, novoXP[p], novoYP[p], xEncontro, xD, novoXR[98-p],Math.abs(novoXR[98-p]-xD));
+console.log(p, marcadorPratos, numeroPratos, novoXP[p], novoYP[p], xEncontro, alpha, novoYP[p] * (alpha - 1) / alpha);
 p=p+1;
 }
 
