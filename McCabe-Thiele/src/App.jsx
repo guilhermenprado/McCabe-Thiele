@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import { useRef } from 'react'
 import './App.css'
 import {  LineChart,  Line,  XAxis,  YAxis,  CartesianGrid,  Tooltip} from "recharts";
 
-const alpha = Math.random() * 8; // Gerar um valor aleatório para alpha entre 0 e 10
+const alpha = Math.random() * 10+1; // Gerar um valor aleatório para alpha entre 0 e 10
+
+
 function App() {
 
 
@@ -11,21 +14,21 @@ const [yD, setyD] = useState([]); // Array para armazenar os valores da reta dia
 const [xL, setxL] = useState([]); // Array para armazenar os valores de xL - fração molar do componente mais volátil na fase líquida
 const [yV, setyV] = useState([]); // Array para armazenar os valores de yV - fração molar do componente mais volátil na fase vapor
 
-let m=0; // Variável para armazenar o valor de m - coeficiente angular da reta de esgotamento
 let p=0; // Variável para controlar o índice do array
+const m = useRef(0); // Variável para armazenar o valor de m - coeficiente angular da reta de esgotamento
 
-const [xF, setxF] = useState(0); // Fração molar do componente mais volátil na alimentação
-const [xD, setxD] = useState(0); // Fração molar do componente mais volátil no destilado
-const [xB, setxB] = useState(0); // Fração molar do componente mais volátil no resíduo
-const [R, setR] = useState(0); // Razão de refluxo
-const [q, setq] = useState(0); // Razão de alimentação
+const [xF, setxF] = useState(0.5); // Fração molar do componente mais volátil na alimentação
+const [xD, setxD] = useState(0.8); // Fração molar do componente mais volátil no destilado
+const [xB, setxB] = useState(0.2); // Fração molar do componente mais volátil no resíduo
+const [R, setR] = useState(1); // Razão de refluxo
+const [q, setq] = useState(0.4); // Razão de alimentação
 
-
+const [xR, setxR] = useState([]); // Array para armazenar os valores de xR - fração molar do componente mais volátil na fase líquida em cada prato para a curva de retificação
 const [yR, setyR] = useState([]); // Array para armazenar os valores de yR - fração molar do componente mais volátil na fase vapor em cada prato para a curva de retificação  
 const [yA, setyA] = useState([]); // Array para armazenar os valores de yA - fração molar do componente mais volátil na fase vapor em cada prato para a curva de alimentação
 const [xA, setxA] = useState([]); // Array para armazenar os valores de xA - fração molar do componente mais volátil na fase líquida em cada prato para a curva de alimentação
 const [yE, setyE] = useState([]); // Array para armazenar os valores de yE - fração molar do componente mais volátil na fase vapor em cada prato para a curva de esgotamento
-let xEncontro = 0; // Variável para armazenar o valor de x no ponto de encontro entre as curvas de retificação e alimentação
+const xEncontro = useRef(0); // Variável para armazenar o valor de x no ponto de encontro entre as curvas de retificação e alimentação
 
 const [xP, setxP] = useState([]); // Array para armazenar os valores de xP - fração molar do componente mais volátil na fase líquida em cada prato
 const [yP, setyP] = useState([]); // Array para armazenar os valores de yP - fração molar do componente mais volátil na fase vapor em cada prato
@@ -35,8 +38,40 @@ let numeroPratos = 0; // Variável para armazenar o número de pratos teóricos 
 let marcadorPratos=0; // Variável para controlar o índice do array dos pratos teóricos
 let confirmar=0;
 
+const [etapa, setEtapa] =  useState(0);
 
-function calcularCurvaELV() {
+function executarMetodo() { // Função para executar o método de McCabe-Thiele, alternando entre as etapas do cálculo a cada clique no botão "Próximo Passo"
+console.log(etapa);
+  switch(etapa) {
+
+    case 0:
+      passo2();
+      break;
+
+    case 1:
+      passo3();
+      break;
+
+    case 2:
+      passo4();
+      break;
+
+    case 3:
+      passo5();
+      break;
+
+    case 4:
+      passo6();
+      break;
+
+  
+  }
+
+  setEtapa((etapa + 1));
+}
+
+
+function passo1() {
   const novoXL = [];
   const novoYV = [];
   const novoXD = [];
@@ -47,7 +82,7 @@ function calcularCurvaELV() {
 
     novoXL.push(x);
     novoYV.push(y);
-
+ console.log(alpha, x, y);
     }
 
     let a=0;
@@ -59,6 +94,7 @@ function calcularCurvaELV() {
 
     a=a+1;
     //console.log(a, x);
+   
 
     }
 
@@ -70,7 +106,7 @@ function calcularCurvaELV() {
 } 
 
 
-function calcularPratosTeoricos() {
+function passo2() {
 
   //calcular a curva de retificação
   const novoXR = [];
@@ -87,12 +123,15 @@ p=0;
     novoXR.push(x);
       novoYR.push(null);
   }
-
+ console.log(alpha, R, x, y);
   }
 p=p+1;
   setyR(novoYR);
+  setxR(novoXR);
 
+}
 
+function passo3() {
 
   //calcular a curva de alimentação
   const novoYA = [];
@@ -111,31 +150,38 @@ p=p+1;
       novoXA.push(null);
     }
     p = p + 1;
+     console.log(alpha, R, q, x, y);
   }
 
   setyA(novoYA);
   setxA(novoXA);
+
+}
+
+function passo4() {
 
   //calcular a curva de esgotamento
 
   // Calcular o valor de m - coeficiente angular da reta de esgotamento
   p=0;
   for (let x = 0; x <= 1; x += 0.01) { 
-    if (Math.abs(novoYR[p] - novoYA[p]) < 0.01) {
-      m=(novoYR[p]-xB)/(x-xB)
-      x=1
+    if (Math.abs(yR[p] - yA[p]) < 0.01) {
+      m.current=(yR[p]-xB)/(x-xB);
+      x=1;
     }
 p=p+1
+
   }
 
+console.log(m);
 //calcular a curva de esgotamento
   const novoXE = [];
   const novoYE = [];
 
  
   for (let x = 0; x <= 1; x += 0.01) {
-
-  const y =  m * (x - xB) + xB;
+      console.log(alpha, R, q,m);
+  const y =  m.current * (x - xB) + xB;
 
     if(x<xB){
       novoXE.push(x);
@@ -145,27 +191,32 @@ p=p+1
     novoXE.push(x);
     novoYE.push(y);
     }
+
   }
 
   setyE(novoYE);
+      console.log(alpha, R, q,m);
+}
 
+function passo5() {
+      console.log(alpha, R, q,m);
   //Limpar curvas anteriores
   let marcador=0; // Variável para controlar a limpeza das curvas
   for(let p=0; p<=100; p+=1){
 
     // Limpar a curva de retificação
-if(novoYR[p] < novoYA[p]){
-      novoYR[p-1] = null;
+if(yR[p] < yA[p]){
+      yR[p-1] = null;
 }
 
     // limpar a curva de alimentação
-if(yV[p] < novoYA[p]){
-      novoYA[p-1] = null;
+if(yV[p] < yA[p]){
+      yA[p-1] = null;
   
   }
 
-  if(novoYR[p] < novoYA[p]){
-     xEncontro = novoXA[p]; // Armazenar o valor de x no ponto de encontro entre as curvas de retificação e alimentação
+  if(yR[p] < yA[p]){
+     xEncontro.current = xA[p]; // Armazenar o valor de x no ponto de encontro entre as curvas de retificação e alimentação
   }
 
   else {
@@ -174,10 +225,15 @@ if(yV[p] < novoYA[p]){
 
     // limpar a curva de esgotamento
 if(marcador==1){
-      novoYE[p+1] = null;
+      yE[p+1] = null;
 }
-  }
 
+  }
+    console.log(alpha, R, q,m, xEncontro);
+}
+
+function passo6() {
+    console.log(alpha, R, q,m, xEncontro);
 // Definir os pontos para os pratos teóricos
   const novoXP = [];
   const novoYP = [];
@@ -188,14 +244,14 @@ for(let x=0; x<=1; x+=0.01){
 if(marcadorPratos==2){ //Atribui os pontos quando o gráfico anda na vertical
 
 
-  if(novoXP[p-1] > xEncontro){ //Calcula x quando está na linha de retificação
+  if(novoXP[p-1] > xEncontro.current){ //Calcula x quando está na linha de retificação
 novoXP.push(novoXP[p-1]);
 const y= R /  (R + 1) * novoXP[p] +  xD /  (R + 1);
 novoYP.push(y);
 marcadorPratos=1;
   }
 
-  if(novoXP[p-1] < xEncontro){ //Calcula x quando está na linha de esgotamento
+  if(novoXP[p-1] < xEncontro.current){ //Calcula x quando está na linha de esgotamento
 
 if(novoXP[p-1] < xB ){ 
  novoXP.push(novoXP[p-1]);
@@ -207,7 +263,7 @@ if(novoXP[p-1] < xB ){
 else{
   novoXP.push(novoXP[p-1]);
 
-  const y=m * (novoXP[p] - xB) + xB;
+  const y=m.current * (novoXP[p] - xB) + xB;
 
 novoYP.push(y);
 marcadorPratos=1;
@@ -228,7 +284,7 @@ else if(marcadorPratos==1){ //Atribui os pontos quando o gráfico anda na horizo
   numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
 }
 
-else if(Math.abs(novoXR[98-p]-xD)<=0.001){ //Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)
+else if(Math.abs(xR[98-p]-xD)<=0.001){ //Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)
   novoXP.push(xD);
   novoYP.push(xD);
   marcadorPratos=1;
@@ -252,6 +308,7 @@ if(novoXP[p-1] < xB && marcadorPratos==2){ // Atribui null para os pontos dos pr
 
 //console.log(p, novoXP[p],novoYP[p]);
 //console.log(p, numeroPratos);
+      console.log(alpha, R, q,m);
 p=p+1;
 }
 
@@ -329,10 +386,6 @@ setyP(ajustadoYP);
       
             </div>
 
-<div className="curva_elv"> {/* Seção para a curva de equilíbrio líquido-vapor */}
-        <h1>Curva de Equilíbrio Líquido-Vapor (ELV)</h1>
-        <button onClick={calcularCurvaELV}>Calcular Curva ELV</button>
-      </div>
 
       <div className="tabela_variaveis">
         <h1>Insira os valores das variáveis</h1>
@@ -345,12 +398,15 @@ setyP(ajustadoYP);
 <input placeholder='Valor de R' type="number" name="R" id="R" onChange={(event) => setR(parseFloat(event.target.value))}/>
 <input placeholder='Valor de q' type="number" name="q" id="q" onChange={(event) => setq(parseFloat(event.target.value))}/>
 
-<button type="button" onClick={calcularPratosTeoricos}>Iniciar Cálculo de Pratos Teóricos</button> 
+<button type="button" onClick={passo1}>Iniciar Cálculo de Pratos Teóricos</button> 
 
 </form>
       </div>
 
       <div className="resultado_cabecalho"> {/* Seção para exibir o resultado do número de pratos teóricos necessários para a separação */}
+        
+        <button type="button" onClick={executarMetodo}>Próximo Passo</button> 
+        
         <h1>Resultado</h1>
         <p>Número de pratos teóricos necessários para a separação: {nPratos}</p>
       </div>
