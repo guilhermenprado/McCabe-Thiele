@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import {  LineChart,  Line,  XAxis,  YAxis,  CartesianGrid,  Tooltip} from "recharts";
 
-const alpha = Math.random() * 10 + 2; // Gerar um valor aleatório para alpha entre 2 e 11
+const alpha = Math.random() * 8; // Gerar um valor aleatório para alpha entre 0 e 10
 function App() {
 
 
@@ -29,6 +29,8 @@ let xEncontro = 0; // Variável para armazenar o valor de x no ponto de encontro
 
 const [xP, setxP] = useState([]); // Array para armazenar os valores de xP - fração molar do componente mais volátil na fase líquida em cada prato
 const [yP, setyP] = useState([]); // Array para armazenar os valores de yP - fração molar do componente mais volátil na fase vapor em cada prato
+
+const [nPratos, setnPratos] = useState(0); // Estado para armazenar o número de pratos teóricos necessários para a separação
 let numeroPratos = 0; // Variável para armazenar o número de pratos teóricos necessários para a separação
 let marcadorPratos=0; // Variável para controlar o índice do array dos pratos teóricos
 let confirmar=0;
@@ -56,7 +58,7 @@ function calcularCurvaELV() {
     novoYD.push(y);
 
     a=a+1;
-    console.log(a, x);
+    //console.log(a, x);
 
     }
 
@@ -157,10 +159,15 @@ if(novoYR[p] < novoYA[p]){
 }
 
     // limpar a curva de alimentação
-if(novoYR[p] < novoYA[p]){
+if(yV[p] < novoYA[p]){
       novoYA[p-1] = null;
+  
+  }
+
+  if(novoYR[p] < novoYA[p]){
      xEncontro = novoXA[p]; // Armazenar o valor de x no ponto de encontro entre as curvas de retificação e alimentação
   }
+
   else {
     marcador=1;
   }
@@ -218,6 +225,7 @@ else if(marcadorPratos==1){ //Atribui os pontos quando o gráfico anda na horizo
   
   novoXP.push(x);
   marcadorPratos=2;
+  numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
 }
 
 else if(Math.abs(novoXR[98-p]-xD)<=0.001){ //Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)
@@ -240,10 +248,15 @@ if(novoXP[p-1] < xB && marcadorPratos==2){ // Atribui null para os pontos dos pr
 
 }
 
-numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
-console.log(p, novoXP[p],novoYP[p]);
+
+
+//console.log(p, novoXP[p],novoYP[p]);
+//console.log(p, numeroPratos);
 p=p+1;
 }
+
+setnPratos(numeroPratos); // Atualiza o estado com o número de pratos teóricos necessários para a separação
+
 
 //colocar os pontos dos pratos teóricos no padrao do grafico
   const ajustadoYP = [];
@@ -256,7 +269,7 @@ if(i==0){ //Encontra o primeiro ponto dos pratos teóricos a partir do ponto de 
   for(i=0; i<=100; i+=1){
 
     if(novoXP[i]!==null){
-    console.log(novoXP[i], p1,i);
+   //console.log(novoXP[i], p1,i);
     p1=i;
     i=100;
     }
@@ -264,19 +277,19 @@ if(i==0){ //Encontra o primeiro ponto dos pratos teóricos a partir do ponto de 
   }
 }
 
-  if(Math.abs(novoXP[p1] - x) < 0.01){
-    console.log(novoXP[p1]);
+  if(Math.abs(novoXP[p1] - x) < 0.01){ //Ajusta os pontos dos pratos, atribuindo os calores calculados
+    //console.log(novoXP[p1]);
     ajustadoYP[100-p]=novoYP[p1]
     p1=p1+1;
   }
 
-  else if(i==101 && xD - x >= 0.01){ //Ajusta os pontos dos pratos teóricos para o padrão do gráfico, atribuindo null para os pontos que não correspondem a um valor de x no gráfico
-    console.log("entrou");
+  else if(i==101 && xD - x >= 0.01){ //Ajusta as curvas horizontais do grafico
+  
   ajustadoYP[100-p]=novoYP[p1]
   }
 
 
-console.log(x, p,  p1,i, ajustadoYP[p],novoXP[p1],novoYP[p1],Math.abs(novoXP[p1] - x));
+//console.log(x, p,  p1,i, ajustadoYP[p],novoXP[p1],novoYP[p1],Math.abs(novoXP[p1] - x));
 p=p+1;
 }
 
@@ -289,27 +302,29 @@ setyP(ajustadoYP);
     <div className="App">
   
         <h1>Aplicação do Método de McCabe-Thiele</h1>
+        <br></br>
 
 
       <div className="explicacao">
         <p>
-          "O método de McCabe-Thiele é uma técnica comumente empregada na área de
+          O método de McCabe-Thiele é uma técnica comumente empregada na área de
           engenharia química para modelar a separação de duas substâncias por uma
           coluna de destilação. Ele utiliza o fato de que a composição em cada
           prato teórico é completamente determinada pela fração molar de um dos
           dois componentes. Este método baseia-se nas premissas de que a coluna
           de destilação é isobárica — ou seja, a pressão permanece constante — e
           que as vazões de líquido e vapor não se alteram ao longo da coluna
-          (ou seja, transbordamento molar constante)."
+          (ou seja, transbordamento molar constante).
         </p>
+        <br></br>
                 <p>
-          "Instruções: <br>
+          Instruções: <br>
            </br> 1. Clique no botão 'Calcular Curva ELV' para gerar a curva de Equilibrio Líquido Vapor<br>
            </br>  2. Insira os valores das variáveis: xF, xD, xB e R. <br>
            </br>  3. Clique no botão 'Calcular' para obter o número de pratos teóricos
             necessários para a separação. <br>
            </br>  4. Os resultados serão exibidos na tela, indicando o número de pratos
-            teóricos necessários para alcançar a separação desejada."
+            teóricos necessários para alcançar a separação desejada.
         </p>
       
             </div>
@@ -335,16 +350,28 @@ setyP(ajustadoYP);
 </form>
       </div>
 
-<div className="resultado">
+      <div className="resultado_cabecalho"> {/* Seção para exibir o resultado do número de pratos teóricos necessários para a separação */}
         <h1>Resultado</h1>
-        <p>Número de pratos teóricos necessários: </p>
-</div>
+        <p>Número de pratos teóricos necessários para a separação: {nPratos}</p>
+      </div>
+
+<div className="resultado">
+       
+        <div className="log_dos_passos"> {/* Seção para exibir o log dos passos do cálculo */}
+        <h2>Log dos Passos do Cálculo</h2>
+        <p>1. Curva de retificação calculada com base na razão de refluxo (R) e na fração molar no destilado (xD).</p>
+        <p>2. Curva de alimentação calculada com base na razão de alimentação (q) e na fração molar na alimentação (xF).</p>
+        <p>3. Curva de esgotamento calculada com base no coeficiente angular (m) da reta de esgotamento, determinado pelo ponto de encontro entre as curvas de retificação e alimentação.</p>
+        <p>4. Limpeza das curvas para garantir que apenas os pontos relevantes sejam exibidos no gráfico.</p>
+        <p>5. Determinação dos pontos para os pratos teóricos, alternando entre as curvas de retificação e esgotamento, e contando o número de pratos necessários para alcançar a separação desejada.</p>
+      </div>
+
 
 <div className="grafico"> {/* Seção para o gráfico da curva de equilíbrio líquido-vapor */}
-<LineChart width={600} height={300} data={xL.map((x, index) => ({ xL: x, yD: yD[index], yV: yV[index], yR: yR[index], yA: yA[index] , yE: yE[index],yP: yP[index]}))}>
+<LineChart margin={{ left: 10, right: 10, top: 10, bottom: 20 }} width={600} height={500} data={xL.map((x, index) => ({ xL: x, yD: yD[index], yV: yV[index], yR: yR[index], yA: yA[index] , yE: yE[index],yP: yP[index]}))}>
   <CartesianGrid strokeDasharray="3 3" />
-  <XAxis dataKey="xL" label={{ value: 'Fração Molar na Fase Líquida (xL)', position: 'insideBottom', offset: -5 }} />
-  <YAxis label={{ value: 'Fração Molar na Fase Vapor (yV)', angle: -90, position: 'insideLeft' }} />
+  <XAxis type="number" dataKey="xL" domain={[0, 1]}   ticks={[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]} tickFormatter={(value) => value.toFixed(2)} label={{ value: 'Fração Molar na Fase Líquida (xL)', position: 'insideBottom', offset: -10 }} />
+  <YAxis ticks={[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]}label={{ value: 'Fração Molar na Fase Vapor (yV)', angle: -90, position: 'insideLeft', dy: 120}} />
   <Tooltip />
  
   {/*Curva x=y*/}
@@ -365,6 +392,8 @@ setyP(ajustadoYP);
   {/*Curva de pratos teóricos*/}
   <Line type="monotone" dataKey="yP" stroke="#ff0000" dot={false} />
 </LineChart>
+</div>
+
 </div>
 
   </div>
