@@ -32,7 +32,7 @@ const [yP, setyP] = useState([]); // Array para armazenar os valores de yP - fra
 let numeroPratos = 0; // Variável para armazenar o número de pratos teóricos necessários para a separação
 let marcadorPratos=0; // Variável para controlar o índice do array dos pratos teóricos
 let confirmar=0;
-let p1=0;
+
 
 function calcularCurvaELV() {
   const novoXL = [];
@@ -48,11 +48,15 @@ function calcularCurvaELV() {
 
     }
 
+    let a=0;
       for (let x = 0; x <= 1; x += 0.01) {
     const y =  x;
 
     novoXD.push(x);
     novoYD.push(y);
+
+    a=a+1;
+    console.log(a, x);
 
     }
 
@@ -237,33 +241,46 @@ if(novoXP[p-1] < xB && marcadorPratos==2){ // Atribui null para os pontos dos pr
 }
 
 numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
-
+console.log(p, novoXP[p],novoYP[p]);
 p=p+1;
 }
 
 //colocar os pontos dos pratos teóricos no padrao do grafico
   const ajustadoYP = [];
 p=0;
+let i=0;
+let p1=0;
 for(let x=1; x>=0; x-=0.01){
+  
+if(i==0){ //Encontra o primeiro ponto dos pratos teóricos a partir do ponto de destilado (xD, xD) e armazena o índice desse ponto em p1
+  for(i=0; i<=100; i+=1){
 
-  for(let i=0; i<=100; i+=1){
-
-if(novoXP[i]!==null){
-
-p1=i;
-i=100;
-}
+    if(novoXP[i]!==null){
+    console.log(novoXP[i], p1,i);
+    p1=i;
+    i=100;
+    }
 
   }
+}
 
   if(Math.abs(novoXP[p1] - x) < 0.01){
     console.log(novoXP[p1]);
-    ajustadoYP[p]=novoYP[p1]
+    ajustadoYP[100-p]=novoYP[p1]
+    p1=p1+1;
   }
-console.log(x, p,  p1, ajustadoYP[p],novoXP[p1],novoYP[p1],Math.abs(novoXP[p1] - x));
+
+  else if(i==101 && xD - x >= 0.01){ //Ajusta os pontos dos pratos teóricos para o padrão do gráfico, atribuindo null para os pontos que não correspondem a um valor de x no gráfico
+    console.log("entrou");
+  ajustadoYP[100-p]=novoYP[p1]
+  }
+
+
+console.log(x, p,  p1,i, ajustadoYP[p],novoXP[p1],novoYP[p1],Math.abs(novoXP[p1] - x));
 p=p+1;
 }
 
+setyP(ajustadoYP);
   
 }
 
@@ -324,7 +341,7 @@ p=p+1;
 </div>
 
 <div className="grafico"> {/* Seção para o gráfico da curva de equilíbrio líquido-vapor */}
-<LineChart width={600} height={300} data={xL.map((x, index) => ({ xL: x, yD: yD[index], yV: yV[index], yR: yR[index], yA: yA[index] , yE: yE[index] }))}>
+<LineChart width={600} height={300} data={xL.map((x, index) => ({ xL: x, yD: yD[index], yV: yV[index], yR: yR[index], yA: yA[index] , yE: yE[index],yP: yP[index]}))}>
   <CartesianGrid strokeDasharray="3 3" />
   <XAxis dataKey="xL" label={{ value: 'Fração Molar na Fase Líquida (xL)', position: 'insideBottom', offset: -5 }} />
   <YAxis label={{ value: 'Fração Molar na Fase Vapor (yV)', angle: -90, position: 'insideLeft' }} />
@@ -344,6 +361,9 @@ p=p+1;
 
   {/*Curva de esgotamento*/}
   <Line type="monotone" dataKey="yE" stroke="#0022ff" dot={false} />
+  
+  {/*Curva de pratos teóricos*/}
+  <Line type="monotone" dataKey="yP" stroke="#ff0000" dot={false} />
 </LineChart>
 </div>
 
