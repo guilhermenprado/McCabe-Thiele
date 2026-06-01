@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import './App.css'
 import {  LineChart,  Line,  XAxis,  YAxis,  CartesianGrid,  Tooltip} from "recharts";
 
-const alpha = Math.random() * 10+1; // Gerar um valor aleatório para alpha entre 0 e 10
+// const alpha = Math.random() * 10+1; // Gerar um valor aleatório para alpha entre 0 e 10
 
 
 function App() {
@@ -26,6 +26,7 @@ const [xD, setxD] = useState(0); // Fração molar do componente mais volátil n
 const [xB, setxB] = useState(0); // Fração molar do componente mais volátil no resíduo
 const [R, setR] = useState(0); // Razão de refluxo
 const [q, setq] = useState(0); // Razão de alimentação
+const [alpha, setAlpha] = useState(0); // Razão de volatilidade
 
 const [xR, setxR] = useState([]); // Array para armazenar os valores de xR - fração molar do componente mais volátil na fase líquida em cada prato para a curva de retificação
 const [yR, setyR] = useState([]); // Array para armazenar os valores de yR - fração molar do componente mais volátil na fase vapor em cada prato para a curva de retificação  
@@ -37,10 +38,9 @@ const xEncontro = useRef(0); // Variável para armazenar o valor de x no ponto d
 const [xP, setxP] = useState([]); // Array para armazenar os valores de xP - fração molar do componente mais volátil na fase líquida em cada prato
 const [yP, setyP] = useState([]); // Array para armazenar os valores de yP - fração molar do componente mais volátil na fase vapor em cada prato
 
-const [nPratos, setnPratos] = useState(0); // Estado para armazenar o número de pratos teóricos necessários para a separação
 let numeroPratos = 0; // Variável para armazenar o número de pratos teóricos necessários para a separação
 let marcadorPratos=0; // Variável para controlar o índice do array dos pratos teóricos
-let cruzaPrato=0; // Variável para controlar o cruzamento entre a curva de alimentacao e o prato ideal
+let cruzaPrato=-1; // Variável para controlar o cruzamento entre a curva de alimentacao e o prato ideal
 let confirmar=0;
 
 const [etapa, setEtapa] =  useState(0);
@@ -274,7 +274,7 @@ function passo6() {
   setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 6.2:</strong> A próxima etapa é conectar este ponto com a curva de retificação ou com a curva de esgotamento por meio de uma linha vertical. </>]); 
   setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 6.3:</strong> Realizando o processo de forma iterativa, retornamos ao passo 6.1 e 6.2 repetindo ambos até que o ponto encontrado após o item 6.2 tenha valor de x menor que xB.</>]); 
   setlogtexto((anteriores) => [    ...anteriores,<>Com o gráfico finalizado, podemos identificar a quantidade de pratos e visualizar o prato ideal de alimentação sendo o prato no qual a curva de Alimentação corta a linha horizontal do gráfico de pratos.</>]); 
-  setlogtexto((anteriores) => [    ...anteriores,<>Neste calculo, temos que o Numero de Pratos é de <strong>{numeroPratos} Pratos</strong>.</>]); 
+  setlogtexto((anteriores) => [    ...anteriores,<>Neste calculo, temos que o Numero de Pratos é de <strong>{numeroPratos} Pratos</strong> e o prato ideal de alimentação é o prato numero <strong>{numeroPratos-cruzaPrato}</strong>.</>]); 
     console.log(alpha, R, q,m, xEncontro);
 // Definir os pontos para os pratos teóricos
   const novoXP = [];
@@ -323,7 +323,14 @@ else if(marcadorPratos==1){ //Atribui os pontos quando o gráfico anda na horizo
   
   novoXP.push(x);
   marcadorPratos=2;
+
+    if (novoXP[p] < xEncontro.current){ // Controla o cruzamento entre a curva de alimentação e o prato ideal
+    cruzaPrato=cruzaPrato+1;
+  }
+  
   numeroPratos=numeroPratos+1; // Incrementa o número de pratos teóricos a cada iteração
+
+
 }
 
 else if(Math.abs(xR[98-p]-xD)<=0.001){ //Atribui o primeiro ponto dos pratos teóricos como o ponto de destilado (xD, xD)
@@ -354,7 +361,7 @@ if(novoXP[p-1] < xB && marcadorPratos==2){ // Atribui null para os pontos dos pr
 p=p+1;
 }
 
-setnPratos(numeroPratos); // Atualiza o estado com o número de pratos teóricos necessários para a separação
+
 
 
 //colocar os pontos dos pratos teóricos no padrao do grafico
@@ -418,7 +425,7 @@ setyP(ajustadoYP);
         <br></br>
                 <p>
           Instruções: <br>
-                   </br>  1. Insira os valores das variáveis: xF, xD, xB e R. <br>
+                   </br>  1. Insira os valores das variáveis: xF, xD, xB, R, q e α  <br>
            </br>  2. Clique no botão 'Iniciar Cálculo' para obter o número de pratos teóricos
             necessários para a separação. <br>
            </br>  3. O passo a passo dos resultados serão exibidos na tela, e ao final do processo será indicado o número de pratos
@@ -458,13 +465,17 @@ setyP(ajustadoYP);
 <input placeholder='0 - 1' type="number"   min="0"  max="1" step="0.1" name="q" id="q" onChange={(event) => setq(parseFloat(event.target.value))}/>
 </div>
 
+<div className="campo "> {/* Seção para os campos de entrada das variáveis */}
+<label>Valor de α</label>
+<input placeholder='2 - 10' type="number"   min="2"  max="10" step="0.1" name="alpha" id="alpha" onChange={(event) => setAlpha(parseFloat(event.target.value))}/>
+</div>
 
 
 </form>
       </div>
 
       <div  className="resultado_cabecalho" > {/* Seção para exibir o resultado do número de pratos teóricos necessários para a separação */}
-        {!calculando && (  <button type="button" className="botao" disabled={!xF || !xD || !xB || !R || !q} onClick={() => {setCalculando(true); passo1()}}>Iniciar Cálculo</button> )}
+        {!calculando && (  <button type="button" className="botao" disabled={!xF || !xD || !xB || !R || !q || !alpha} onClick={() => {setCalculando(true); passo1()}}>Iniciar Cálculo</button> )}
         {calculando && (
           <button type="button" className="botao" onClick={executarMetodo}>Próximo Passo</button>
         )}
