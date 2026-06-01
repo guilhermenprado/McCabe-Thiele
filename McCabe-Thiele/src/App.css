@@ -30,6 +30,7 @@
 
 .log_dos_passos {
   margin-top: 20px;
+  overflow-y: auto;
   text-align: left;
   width: 700px;
   height: 600px;

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useRef } from 'react'
+import { useEffect } from 'react';
 import './App.css'
 import {  LineChart,  Line,  XAxis,  YAxis,  CartesianGrid,  Tooltip} from "recharts";
 
@@ -8,6 +9,9 @@ const alpha = Math.random() * 10+1; // Gerar um valor aleatório para alpha entr
 
 function App() {
 
+const [logtexto, setlogtexto] = useState([]); // Estado para armazenar o log dos passos do cálculo
+const logRef = useRef(null); // Referência para o elemento do log dos passos do cálculo
+const [calculando, setCalculando] = useState(false); // Estado para controlar se o cálculo está em andamento ou não
 
 const [yD, setyD] = useState([]); // Array para armazenar os valores da reta diagonal
   
@@ -20,7 +24,7 @@ const m = useRef(0); // Variável para armazenar o valor de m - coeficiente angu
 const [xF, setxF] = useState(0.5); // Fração molar do componente mais volátil na alimentação
 const [xD, setxD] = useState(0.8); // Fração molar do componente mais volátil no destilado
 const [xB, setxB] = useState(0.2); // Fração molar do componente mais volátil no resíduo
-const [R, setR] = useState(1); // Razão de refluxo
+const [R, setR] = useState(2); // Razão de refluxo
 const [q, setq] = useState(0.4); // Razão de alimentação
 
 const [xR, setxR] = useState([]); // Array para armazenar os valores de xR - fração molar do componente mais volátil na fase líquida em cada prato para a curva de retificação
@@ -39,6 +43,8 @@ let marcadorPratos=0; // Variável para controlar o índice do array dos pratos 
 let confirmar=0;
 
 const [etapa, setEtapa] =  useState(0);
+
+useEffect(() => {  if (logRef.current) {    logRef.current.scrollTop = logRef.current.scrollHeight;  }}, [logtexto]); // Efeito para rolar o log dos passos do cálculo para o final a cada atualização do estado logtexto
 
 function executarMetodo() { // Função para executar o método de McCabe-Thiele, alternando entre as etapas do cálculo a cada clique no botão "Próximo Passo"
 console.log(etapa);
@@ -72,6 +78,13 @@ console.log(etapa);
 
 
 function passo1() {
+
+  setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 1:</strong> Neste passo vamos inserir uma curva teorica de equilíbrio líquido-vapor (ELV) com base no valor de alpha gerado por um modelo ramdomico.</>]); // Atualizar o log dos passos do cálculo
+  setlogtexto((anteriores) => [    ...anteriores,<>Durante os calculos das curvas sempre vamos considerar que y é a fração molar do componente mais volátil na fase vapor e x é a fração molar do componente mais volátil na fase líquida</>]); // Atualizar o log dos passos do cálculo
+  setlogtexto((anteriores) => [    ...anteriores,<>Utilizamos a equação: y = (α * x) / (1 + (α - 1) * x) onde α é a razão de volatilidade. Em sistemas de separação, essa curva é essencial para entender o comportamento das fases líquida e vapor em equilíbrio. Quando consideramos sistemas reais esta curva é gerada pela mistura dos componentes.</>]); // Atualizar o log dos passos do cálculo
+  setlogtexto((anteriores) => [    ...anteriores,<>Neste calculo, foi utilizado o valor de α = {alpha.toFixed(2)}.</>]);
+  setlogtexto((anteriores) => [    ...anteriores,<>Em sistemas de separação, essa curva é essencial para entender o comportamento das fases líquida e vapor em equilíbrio. Quando consideramos sistemas reais esta curva é gerada pela mistura dos componentes.</>]); // Atualizar o log dos passos do cálculo
+
   const novoXL = [];
   const novoYV = [];
   const novoXD = [];
@@ -108,6 +121,14 @@ function passo1() {
 
 function passo2() {
 
+  setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 2:</strong> Neste passo vamos calcular a curva de retificação com base na razão de refluxo (R) e na fração molar no destilado (xD). Esta curva tem a função de representar o comportamento da fase vapor em relação à fase líquida durante o processo de retificação.</>]); // Atualizar o log dos passos do cálculo
+  setlogtexto((anteriores) => [    ...anteriores,<>Para calcular esta curva, utilizamos a equação: y = (R / (R + 1)) * x + (xD / (R + 1)), onde R é a razão de refluxo e xD a fração molar no destilado.</>]); // Atualizar o log dos passos do cálculo
+  setlogtexto((anteriores) => [    ...anteriores,<>Nesta curva, quanto maior a razão de refluxo (R), menos inclinada será a curva, e mais elevada será a temperatura de ebulição do líquido na coluna de retificação.</>]); // Atualizar o log dos passos do cálculo
+
+  //calcular a curva de retificação
+
+
+  //calcular a curva de retificação
   //calcular a curva de retificação
   const novoXR = [];
   const novoYR = [];
@@ -132,6 +153,11 @@ p=p+1;
 }
 
 function passo3() {
+
+    setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 3:</strong> Neste passo, vamos calcular a curva de alimentação com base na razão de alimentação (q) e na fração molar na alimentação (xF).</>]); // Atualizar o log dos passos do cálculo
+setlogtexto((anteriores) => [    ...anteriores,<>Para calcular esta curva, utilizamos a equação: y = (q / (q - 1)) * x + (xF / (1 - q)), onde q é a razão de alimentação e xF é a fração molar na alimentação.</>]); // Atualizar o log dos passos do cálculo
+  setlogtexto((anteriores) => [    ...anteriores,<>Nesta curva, a inclinação depende da razão de alimentação (q). Quanto maior a razão de alimentação, mais inclinada será a curva. Para os valores de q=1, a curva se torna vertical e para q=0, a curva se torna horizontal.</>]); // Atualizar o log dos passos do cálculo
+
 
   //calcular a curva de alimentação
   const novoYA = [];
@@ -159,6 +185,10 @@ function passo3() {
 }
 
 function passo4() {
+
+  setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 4:</strong> Nesta etapa, vamos calcular a curva de esgotamento com base na razão de refluxo (R) e na fração molar no destilado (xD).</>]); // Atualizar o log dos passos do cálculo
+setlogtexto((anteriores) => [    ...anteriores,<>Para calcular esta curva, utilizamos a equação: y = m * (x - xB) + xB, onde m é o coeficiente angular da reta de esgotamento e xB é a fração molar no fundo da coluna. </>]); // Atualizar o log dos passos do cálculo
+  setlogtexto((anteriores) => [    ...anteriores,<>Desta forma, precisamos inicialmente calcular o valor de m que é obtido por meio da regressão linear considerando os pontos de xB e da interseção das curvas de alimentação e retificação. </>]); // Atualizar o log dos passos do cálculo
 
   //calcular a curva de esgotamento
 
@@ -199,6 +229,9 @@ console.log(m);
 }
 
 function passo5() {
+
+    setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 5:</strong> Neste passo, para uma melhor visualização vamos fazer a remoção de pontos das curvas de retificação, alimentação e esgotamento de modo a deixar o gráfico mais claro.</>]); // Atualizar o log dos passos do cálculo
+
       console.log(alpha, R, q,m);
   //Limpar curvas anteriores
   let marcador=0; // Variável para controlar a limpeza das curvas
@@ -233,6 +266,13 @@ if(marcador==1){
 }
 
 function passo6() {
+
+    setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 6:</strong> Neste passo, vamos calcular o número de pratos teóricos necessários para a separação, com base nas curvas de retificação, alimentação e esgotamento.</>]); // Atualizar o log dos passos do cálculo
+  setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 6.1:</strong> Para isto iniciamos conectando o ponto xD por meio de uma curva horizontal com a curva de Equilibrio Líquido Vapor (ELV). </>]); 
+  setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 6.2:</strong> A próxima etapa é conectar este ponto com a curva de retificação ou com a curva de esgotamento por meio de uma linha vertical. </>]); 
+  setlogtexto((anteriores) => [    ...anteriores,<><strong>Passo 6.3:</strong> Realizando o processo de forma iterativa, retornamos ao passo 6.1 e 6.2 repetindo ambos até que o ponto encontrado após o item 6.2 tenha valor de x menor que xB.</>]); 
+  setlogtexto((anteriores) => [    ...anteriores,<>Com o gráfico finalizado, podemos identificar a quantidade de pratos e visualizar o prato ideal de alimentação sendo o prato no qual a curva de Alimentação corta a linha horizontal do gráfico de pratos.</>]); 
+  setlogtexto((anteriores) => [    ...anteriores,<>Neste calculo, temos que o Numero de Pratos é de <strong>{numeroPratos} Pratos</strong>.</>]); 
     console.log(alpha, R, q,m, xEncontro);
 // Definir os pontos para os pratos teóricos
   const novoXP = [];
@@ -376,11 +416,10 @@ setyP(ajustadoYP);
         <br></br>
                 <p>
           Instruções: <br>
-           </br> 1. Clique no botão 'Calcular Curva ELV' para gerar a curva de Equilibrio Líquido Vapor<br>
-           </br>  2. Insira os valores das variáveis: xF, xD, xB e R. <br>
-           </br>  3. Clique no botão 'Calcular' para obter o número de pratos teóricos
+                   </br>  1. Insira os valores das variáveis: xF, xD, xB e R. <br>
+           </br>  2. Clique no botão 'Calcular' para obter o número de pratos teóricos
             necessários para a separação. <br>
-           </br>  4. Os resultados serão exibidos na tela, indicando o número de pratos
+           </br>  3. O passo a passo dos resultados serão exibidos na tela, e ao final do processo será indicado o número de pratos
             teóricos necessários para alcançar a separação desejada.
         </p>
       
@@ -398,29 +437,26 @@ setyP(ajustadoYP);
 <input placeholder='Valor de R' type="number" name="R" id="R" onChange={(event) => setR(parseFloat(event.target.value))}/>
 <input placeholder='Valor de q' type="number" name="q" id="q" onChange={(event) => setq(parseFloat(event.target.value))}/>
 
-<button type="button" onClick={passo1}>Iniciar Cálculo de Pratos Teóricos</button> 
+{!calculando && (  <button type="button" onClick={() => {setCalculando(true); passo1()}}>Iniciar Cálculo de Pratos Teóricos</button> )}
 
 </form>
       </div>
 
-      <div className="resultado_cabecalho"> {/* Seção para exibir o resultado do número de pratos teóricos necessários para a separação */}
+      <div  className="resultado_cabecalho" > {/* Seção para exibir o resultado do número de pratos teóricos necessários para a separação */}
         
-        <button type="button" onClick={executarMetodo}>Próximo Passo</button> 
-        
+        {calculando && (
+          <button type="button" onClick={executarMetodo}>Próximo Passo</button>
+        )}
         <h1>Resultado</h1>
-        <p>Número de pratos teóricos necessários para a separação: {nPratos}</p>
       </div>
 
 <div className="resultado">
        
-        <div className="log_dos_passos"> {/* Seção para exibir o log dos passos do cálculo */}
+        <div className="log_dos_passos" ref={logRef}> {/* Seção para exibir o log dos passos do cálculo */}
         <h2>Log dos Passos do Cálculo</h2>
-        <p>1. Curva de retificação calculada com base na razão de refluxo (R) e na fração molar no destilado (xD).</p>
-        <p>2. Curva de alimentação calculada com base na razão de alimentação (q) e na fração molar na alimentação (xF).</p>
-        <p>3. Curva de esgotamento calculada com base no coeficiente angular (m) da reta de esgotamento, determinado pelo ponto de encontro entre as curvas de retificação e alimentação.</p>
-        <p>4. Limpeza das curvas para garantir que apenas os pontos relevantes sejam exibidos no gráfico.</p>
-        <p>5. Determinação dos pontos para os pratos teóricos, alternando entre as curvas de retificação e esgotamento, e contando o número de pratos necessários para alcançar a separação desejada.</p>
-      </div>
+    {logtexto.map((msg, index) => (      <div key={index} style={{ marginBottom: "15px" }}>{msg}</div>
+    ))}
+              </div>
 
 
 <div className="grafico"> {/* Seção para o gráfico da curva de equilíbrio líquido-vapor */}
