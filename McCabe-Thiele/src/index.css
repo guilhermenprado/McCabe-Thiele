@@ -9,6 +9,6 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 min-height: 100vh;
 color: #333;
-background: #84c7fb;  
+background: linear-gradient(50deg, #79ddd8, #bcd4ec);  
 
 }
