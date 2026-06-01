@@ -21,11 +21,11 @@ const [yV, setyV] = useState([]); // Array para armazenar os valores de yV - fra
 let p=0; // Variável para controlar o índice do array
 const m = useRef(0); // Variável para armazenar o valor de m - coeficiente angular da reta de esgotamento
 
-const [xF, setxF] = useState(0.5); // Fração molar do componente mais volátil na alimentação
-const [xD, setxD] = useState(0.8); // Fração molar do componente mais volátil no destilado
-const [xB, setxB] = useState(0.2); // Fração molar do componente mais volátil no resíduo
-const [R, setR] = useState(2); // Razão de refluxo
-const [q, setq] = useState(0.4); // Razão de alimentação
+const [xF, setxF] = useState(0); // Fração molar do componente mais volátil na alimentação
+const [xD, setxD] = useState(0); // Fração molar do componente mais volátil no destilado
+const [xB, setxB] = useState(0); // Fração molar do componente mais volátil no resíduo
+const [R, setR] = useState(0); // Razão de refluxo
+const [q, setq] = useState(0); // Razão de alimentação
 
 const [xR, setxR] = useState([]); // Array para armazenar os valores de xR - fração molar do componente mais volátil na fase líquida em cada prato para a curva de retificação
 const [yR, setyR] = useState([]); // Array para armazenar os valores de yR - fração molar do componente mais volátil na fase vapor em cada prato para a curva de retificação  
@@ -40,11 +40,13 @@ const [yP, setyP] = useState([]); // Array para armazenar os valores de yP - fra
 const [nPratos, setnPratos] = useState(0); // Estado para armazenar o número de pratos teóricos necessários para a separação
 let numeroPratos = 0; // Variável para armazenar o número de pratos teóricos necessários para a separação
 let marcadorPratos=0; // Variável para controlar o índice do array dos pratos teóricos
+let cruzaPrato=0; // Variável para controlar o cruzamento entre a curva de alimentacao e o prato ideal
 let confirmar=0;
 
 const [etapa, setEtapa] =  useState(0);
 
 useEffect(() => {  if (logRef.current) {    logRef.current.scrollTop = logRef.current.scrollHeight;  }}, [logtexto]); // Efeito para rolar o log dos passos do cálculo para o final a cada atualização do estado logtexto
+
 
 function executarMetodo() { // Função para executar o método de McCabe-Thiele, alternando entre as etapas do cálculo a cada clique no botão "Próximo Passo"
 console.log(etapa);
@@ -417,7 +419,7 @@ setyP(ajustadoYP);
                 <p>
           Instruções: <br>
                    </br>  1. Insira os valores das variáveis: xF, xD, xB e R. <br>
-           </br>  2. Clique no botão 'Calcular' para obter o número de pratos teóricos
+           </br>  2. Clique no botão 'Iniciar Cálculo' para obter o número de pratos teóricos
             necessários para a separação. <br>
            </br>  3. O passo a passo dos resultados serão exibidos na tela, e ao final do processo será indicado o número de pratos
             teóricos necessários para alcançar a separação desejada.
@@ -429,23 +431,42 @@ setyP(ajustadoYP);
       <div className="tabela_variaveis">
         <h1>Insira os valores das variáveis</h1>
 
-<form> {/* Formulário para entrada dos valores das variáveis*/}
+<form className="formulario"> {/* Formulário para entrada dos valores das variáveis*/}
 
-<input placeholder='Valor de xF' type="number" name="xF" id="xF" onChange={(event) => setxF(parseFloat(event.target.value))}/>
-<input placeholder='Valor de xD' type="number" name="xD" id="xD" onChange={(event) => setxD(parseFloat(event.target.value))}/>
-<input placeholder='Valor de xB' type="number" name="xB" id="xB" onChange={(event) => setxB(parseFloat(event.target.value))}/>
-<input placeholder='Valor de R' type="number" name="R" id="R" onChange={(event) => setR(parseFloat(event.target.value))}/>
-<input placeholder='Valor de q' type="number" name="q" id="q" onChange={(event) => setq(parseFloat(event.target.value))}/>
+<div className="campo "> {/* Seção para os campos de entrada das variáveis */}
+<label>Valor de xF</label>
+<input placeholder='0 - 1' type="number"   min="0"  max="1" step="0.01" name="xF" id="xF" onChange={(event) => setxF(parseFloat(event.target.value))}/>
+</div>
 
-{!calculando && (  <button type="button" onClick={() => {setCalculando(true); passo1()}}>Iniciar Cálculo de Pratos Teóricos</button> )}
+<div className="campo "> {/* Seção para os campos de entrada das variáveis */}
+<label>Valor de xD</label>
+<input placeholder='0 - 1' type="number"   min="0"  max="1" step="0.1" name="xD" id="xD" onChange={(event) => setxD(parseFloat(event.target.value))}/>
+</div>
+
+<div className="campo "> {/* Seção para os campos de entrada das variáveis */}
+<label>Valor de xB</label>
+<input placeholder='0 - 1' type="number"   min="0"  max="1" step="0.1" name="xB" id="xB" onChange={(event) => setxB(parseFloat(event.target.value))}/>
+</div>
+
+<div className="campo "> {/* Seção para os campos de entrada das variáveis */}
+<label>Valor de R</label>
+<input placeholder='0 - 5' type="number"   min="0"  max="5" step="0.1" name="R" id="R" onChange={(event) => setR(parseFloat(event.target.value))}/>
+</div>
+
+<div className="campo "> {/* Seção para os campos de entrada das variáveis */}
+<label>Valor de q</label>
+<input placeholder='0 - 1' type="number"   min="0"  max="1" step="0.1" name="q" id="q" onChange={(event) => setq(parseFloat(event.target.value))}/>
+</div>
+
+
 
 </form>
       </div>
 
       <div  className="resultado_cabecalho" > {/* Seção para exibir o resultado do número de pratos teóricos necessários para a separação */}
-        
+        {!calculando && (  <button type="button" className="botao" disabled={!xF || !xD || !xB || !R || !q} onClick={() => {setCalculando(true); passo1()}}>Iniciar Cálculo</button> )}
         {calculando && (
-          <button type="button" onClick={executarMetodo}>Próximo Passo</button>
+          <button type="button" className="botao" onClick={executarMetodo}>Próximo Passo</button>
         )}
         <h1>Resultado</h1>
       </div>
@@ -460,7 +481,7 @@ setyP(ajustadoYP);
 
 
 <div className="grafico"> {/* Seção para o gráfico da curva de equilíbrio líquido-vapor */}
-<LineChart margin={{ left: 10, right: 10, top: 10, bottom: 20 }} width={600} height={500} data={xL.map((x, index) => ({ xL: x, yD: yD[index], yV: yV[index], yR: yR[index], yA: yA[index] , yE: yE[index],yP: yP[index]}))}>
+<LineChart margin={{ left: 10, right: 10, top: 10, bottom: 20 }} width={550} height={450} data={xL.map((x, index) => ({ xL: x, yD: yD[index], yV: yV[index], yR: yR[index], yA: yA[index] , yE: yE[index],yP: yP[index]}))}>
   <CartesianGrid strokeDasharray="3 3" />
   <XAxis type="number" dataKey="xL" domain={[0, 1]}   ticks={[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]} tickFormatter={(value) => value.toFixed(2)} label={{ value: 'Fração Molar na Fase Líquida (xL)', position: 'insideBottom', offset: -10 }} />
   <YAxis ticks={[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]}label={{ value: 'Fração Molar na Fase Vapor (yV)', angle: -90, position: 'insideLeft', dy: 120}} />
