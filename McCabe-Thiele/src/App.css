@@ -8,6 +8,14 @@
   text-align: center;
 }
 
+.Referencia {
+  font-size: 0.8rem;
+  color: #475569;
+  text-align: left;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #cbd5e1;
+}
+
 h1 {
   font-size: 2rem;
   font-weight: 700;
