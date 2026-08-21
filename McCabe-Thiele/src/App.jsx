@@ -519,6 +519,9 @@ setyP(ajustadoYP);
 </div>
 
 </div>
+                <div className="Referencia">
+      <p><br></br><br></br>Aplicação construida por Guilherme Nardin Prado https://www.linkedin.com/in/guilherme-n-prado/ </p>
+    </div>
 
   </div>
   )
